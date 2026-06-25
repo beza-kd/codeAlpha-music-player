@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workspace Player</title>
+    <style>
+        /* --- ETHIOPIAN DAWN THEME --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e140a 0%, #0c0703 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #f8fafc;
+        }
+
+        /* --- THE PLAYER CONSOLE --- */
+        .player-app {
+            background: #18110a;
+            border: 2px solid #3a2512;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 480px;
+            padding: 30px;
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8);
+            position: relative;
+        }
+
+        /* --- YOUTUBE EMULATED VIDEO VIEWPORT --- */
+        .yt-thumb-canvas {
+            width: 100%;
+            height: 210px;
+            background: linear-gradient(to bottom, #2d1a10, #130a05);
+            border-radius: 16px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 20px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        /* Glowing Amber Flame Ambient Atmosphere (from image_41010a.jpg) */
+        .yt-thumb-canvas::before {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 20px;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.45) 0%, rgba(217, 119, 6, 0) 70%);
+            filter: blur(12px);
+            border-radius: 50%;
+        }
+
+        /* Official Channel Stamp Watermark Badge Overlay */
+        .yt-badge-stamp {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            padding: 4px 10px;
+            border: 1px solid #fbbf24;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            color: #fbbf24;
+            font-weight: 700;
+            background: rgba(0, 0, 0, 0.6);
+            letter-spacing: 0.5px;
+        }
+
+        .yt-canvas-title {
+            font-size: 1.3rem;
+            color: #ffffff;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.95);
+            z-index: 2;
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+
+        .yt-canvas-sub {
+            font-size: 0.85rem;
+            color: #fbbf24;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.95);
+            z-index: 2;
+            font-weight: 500;
+        }
+
+        /* --- PROGRESS BAR TRACK --- */
+        .timeline-box {
+            margin-bottom: 24px;
+        }
+
+        .timeline-bg {
+            width: 100%;
+            height: 6px;
+            background: #2e1f14;
+            border-radius: 10px;
+            cursor: pointer;
+            position: relative;
+            margin-bottom: 8px;
+        }
+
+        .timeline-progress {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #d97706, #fbbf24);
+            border-radius: 10px;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .time-stamps {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #a16207;
+            font-family: monospace;
+            font-weight: 600;
+        }
+
+        /* --- THE CONTROLLERS --- */
+        .media-actions {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 28px;
+            margin-bottom: 28px;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: none;
+            color: #a16207;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: color 0.2s, transform 0.2s;
+        }
+
+        .action-btn:hover {
+            color: #fbbf24;
+            transform: scale(1.1);
+        }
+
+        .action-btn.master-toggle {
+            background: #fbbf24;
+            color: #18110a;
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.3rem;
+            box-shadow: 0 6px 18px rgba(251, 191, 36, 0.35);
+        }
+
+        .action-btn.master-toggle:hover {
+            background: #ffffff;
+            transform: scale(1.05);
+        }
+
+        /* Hardware Volume Bar Grid */
+        .hardware-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #23190f;
+            padding: 10px 16px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            font-size: 0.85rem;
+            border: 1px solid #2e1f14;
+        }
+
+        .vol-deck {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .vol-range {
+            width: 80px;
+            accent-color: #fbbf24;
+            cursor: pointer;
+        }
+
+        .badge-switch {
+            cursor: pointer;
+            font-weight: 700;
+            color: #78350f;
+            transition: color 0.2s;
+        }
+
+        .badge-switch.enabled {
+            color: #34d399;
+        }
+
+        /* --- ROW CONTAINER (From image_4108a6.jpg) --- */
+        .sc-scroll-row {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding-bottom: 14px;
+            scroll-behavior: smooth;
+        }
+
+        .sc-scroll-row::-webkit-scrollbar {
+            height: 6px;
+        }
+        .sc-scroll-row::-webkit-scrollbar-thumb {
+            background: #3a2512;
+            border-radius: 10px;
+        }
+
+        .sc-track-card {
+            flex: 0 0 125px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .sc-track-card:hover {
+            transform: translateY(-3px);
+        }
+
+        /* 16:9 Aspect Video Thumbnail Card Framework Style */
+        .sc-artwork {
+            width: 125px;
+            height: 84px;
+            background: linear-gradient(135deg, #3a2216, #180e09);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 8px;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+
+        .sc-artwork::after {
+            content: '✟';
+            position: absolute;
+            bottom: 4px;
+            right: 6px;
+            font-size: 0.65rem;
+            color: #fbbf24;
+            opacity: 0.3;
+        }
+
+        .sc-track-card.selected .sc-artwork {
+            border-color: #fbbf24;
+            background: linear-gradient(135deg, #54311f, #26140b);
+            box-shadow: 0 0 12px rgba(251, 191, 36, 0.2);
+        }
+
+        .sc-card-innertext {
+            font-size: 0.75rem;
+            color: #fbbf24;
+            text-align: center;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            letter-spacing: 0.5px;
+        }
+
+        .sc-meta-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .sc-meta-chanter {
+            font-size: 0.75rem;
+            color: #a16207;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="player-app">
+        <div class="yt-thumb-canvas">
+            <div class="yt-badge-stamp">ማኅቶት</div>
+            <div class="yt-canvas-title" id="canvas-title">በድንኳኔ እልልታ ሙሉ ነው</div>
+            <div class="yt-canvas-sub" id="canvas-chanter">ሊቀ መዘምራን ቴዎድሮስ ዮሴፍ</div>
+        </div>
+
+        <div class="timeline-box">
+            <div class="timeline-bg" id="scrub-pad">
+                <div class="timeline-progress" id="progress-line"></div>
+            </div>
+            <div class="time-stamps">
+                <span id="time-now">0:00</span>
+                <span id="time-duration">0:00</span>
+            </div>
+        </div>
+
+        <div class="media-actions">
+            <button class="action-btn" onclick="triggerPrev()">⏮</button>
+            <button class="action-btn master-toggle" id="state-toggle" onclick="togglePlay()">▶</button>
+            <button class="action-btn" onclick="triggerNext()">⏭</button>
+        </div>
+
+        <div class="hardware-row">
+            <div class="vol-deck">
+                <span>🔊</span>
+                <input type="range" class="vol-range" id="vol-deck" min="0" max="1" step="0.05" value="0.8" oninput="setVolume(this.value)">
+            </div>
+            <div class="badge-switch enabled" id="auto-badge" onclick="toggleAutoplay()">Autoplay: ON</div>
+        </div>
+
+        <div class="sc-scroll-row" id="sc-scroll-container">
+            </div>
+    </div>
+
+    <audio id="audio-core" crossorigin="anonymous"></audio>
+
+    <script>
+        const tracks = [
+            { 
+                title: "በድንኳኔ እልልታ ሙሉ ነው", 
+                chanter: "ሊቀ መዘምራን ቴዎድሮስ ዮሴፍ", 
+                src: "https://tewahedo.fra1.digitaloceanspaces.com/Mezmur/Tewodros%20Yosef/Bedenkuane%20Elelta%20Mulu%20New.mp3",
+                shortGehez: "በድንኳኔ"
+            },
+            { 
+                title: "አይናችን ነሽ ማርያም", 
+                chanter: "ሊቀ መዘምራን ቴዎድሮስ ዮሴፍ", 
+                src: "https://tewahedo.fra1.digitaloceanspaces.com/Mezmur/Tewodros%20Yosef/Aynachen%20Nesh%20Mariam.mp3",
+                shortGehez: "አይናችን ነሽ"
+            },
+            { 
+                title: "ከኃጢአተኛው ድንኳን", 
+                chanter: "ሊቀ መዘምራን ቴዎድሮስ ዮሴፍ", 
+                src: "https://tewahedo.fra1.digitaloceanspaces.com/Mezmur/Tewodros%20Yosef/Endemanenetema.mp3",
+                shortGehez: "ከኃጢአተኛው ድንኳን"
+            },
+            { 
+                title: "ማርያም ማርያም", 
+                chanter: "ሊቀ መዘምራን ቴዎድሮስ ዮሴፍ", 
+                src: "https://tewahedo.fra1.digitaloceanspaces.com/Mezmur/Tewodros%20Yosef/Mariam%20Mariam.mp3",
+                shortGehez: "ማርያም"
+            }
+        ];
+
+        let index = 0;
+        let active = false;
+        let autoplay = true;
+
+        const audio = document.getElementById('audio-core');
+        const stateBtn = document.getElementById('state-toggle');
+        const canvasTitle = document.getElementById('canvas-title');
+        const canvasChanter = document.getElementById('canvas-chanter');
+        const progressLine = document.getElementById('progress-line');
+        const scrubPad = document.getElementById('scrub-pad');
+        const timeNow = document.getElementById('time-now');
+        const timeDuration = document.getElementById('time-duration');
+        const scrollContainer = document.getElementById('sc-scroll-container');
+        const autoBadge = document.getElementById('auto-badge');
+
+        window.addEventListener('DOMContentLoaded', () => {
+            buildSoundCloudUI();
+            setupTrack(index);
+        });
+
+        function setupTrack(trackIndex) {
+            const data = tracks[trackIndex];
+            audio.src = data.src;
+            
+            canvasTitle.textContent = data.title;
+            canvasChanter.textContent = data.chanter;
+
+            document.querySelectorAll('.sc-track-card').forEach((card, i) => {
+                if(i === trackIndex) card.classList.add('selected');
+                else card.classList.remove('selected');
+            });
+
+            if (active) {
+                audio.play().catch(err => console.log("Stream context authorization await hook:", err));
+            }
+        }
+
+        function togglePlay() {
+            if (active) {
+                audio.pause();
+                stateBtn.textContent = "▶";
+                active = false;
+            } else {
+                audio.play().catch(err => console.log("Stream dynamic track allocation fallback log:", err));
+                stateBtn.textContent = "⏸";
+                active = true;
+            }
+        }
+
+        function triggerNext() {
+            index = (index + 1) % tracks.length;
+            setupTrack(index);
+        }
+
+        function triggerPrev() {
+            index = (index - 1 + tracks.length) % tracks.length;
+            setupTrack(index);
+        }
+
+        function setVolume(v) {
+            audio.volume = v;
+        }
+
+        function toggleAutoplay() {
+            autoplay = !autoplay;
+            if(autoplay) {
+                autoBadge.textContent = "Autoplay: ON";
+                autoBadge.classList.add('enabled');
+            } else {
+                autoBadge.textContent = "Autoplay: OFF";
+                autoBadge.classList.remove('enabled');
+            }
+        }
+
+        function convertTime(sec) {
+            if (isNaN(sec)) return "0:00";
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return m + ":" + (s < 10 ? "0" : "") + s;
+        }
+
+        audio.addEventListener('timeupdate', () => {
+            const ratio = (audio.currentTime / audio.duration) * 100;
+            progressLine.style.width = ratio + "%";
+            timeNow.textContent = convertTime(audio.currentTime);
+        });
+
+        audio.addEventListener('loadedmetadata', () => {
+            timeDuration.textContent = convertTime(audio.duration);
+        });
+
+        scrubPad.addEventListener('click', (e) => {
+            const totalWidth = scrubPad.clientWidth;
+            const clickPosition = e.offsetX;
+            audio.currentTime = (clickPosition / totalWidth) * audio.duration;
+        });
+
+        audio.addEventListener('ended', () => {
+            if (autoplay) {
+                triggerNext();
+            } else {
+                active = false;
+                stateBtn.textContent = "▶";
+            }
+        });
+
+        function buildSoundCloudUI() {
+            scrollContainer.innerHTML = "";
+            tracks.forEach((track, i) => {
+                const div = document.createElement('div');
+                div.className = "sc-track-card";
+                div.innerHTML = `
+                    <div class="sc-artwork">
+                        <div class="sc-card-innertext">${track.shortGehez}</div>
+                    </div>
+                    <span class="sc-meta-title">${track.title}</span>
+                    <span class="sc-meta-chanter">${track.chanter.split(' ')[1] || track.chanter}</span>
+                `;
+                
+                div.addEventListener('click', () => {
+                    index = i;
+                    active = true;
+                    stateBtn.textContent = "⏸";
+                    setupTrack(index);
+                });
+                scrollContainer.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>
