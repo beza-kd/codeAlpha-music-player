@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Workspace Player</title>
+    <title>Orthodox Mezmur Studio Console</title>
     <style>
-        /* --- ETHIOPIAN DAWN THEME --- */
+        /* --- GOLDEN HALO STUDIO THEME --- */
         * {
             margin: 0;
             padding: 0;
@@ -14,63 +14,71 @@
         }
 
         body {
-            background: linear-gradient(135deg, #1e140a 0%, #0c0703 100%);
+            background: radial-gradient(circle at center, #140d07 0%, #050301 100%);
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 20px;
             color: #f8fafc;
         }
 
-        /* --- THE PLAYER CONSOLE --- */
+        /* --- THE APPARATUS MAIN CONTAINER --- */
         .player-app {
-            background: #18110a;
-            border: 2px solid #3a2512;
+            background: rgba(24, 17, 10, 0.95);
+            border: 1px solid rgba(217, 119, 6, 0.25);
             border-radius: 24px;
             width: 100%;
-            max-width: 480px;
-            padding: 30px;
-            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8);
+            max-width: 440px;
+            padding: 28px;
+            box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.9),
+                        0 0 40px rgba(217, 119, 6, 0.05);
             position: relative;
+            backdrop-filter: blur(10px);
         }
 
-        /* --- YOUTUBE EMULATED VIDEO VIEWPORT --- */
-        .yt-thumb-canvas {
+        /* --- METADATA & CANVAS --- */
+        .meta-container {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        /* YouTube-inspired dynamic video thumbnail frame canvas */
+        .yt-preview-canvas {
             width: 100%;
-            height: 210px;
+            height: 190px;
             background: linear-gradient(to bottom, #2d1a10, #130a05);
             border-radius: 16px;
-            margin-bottom: 24px;
+            margin: 12px auto 20px auto;
             position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end;
-            padding: 20px;
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
             border: 1px solid rgba(251, 191, 36, 0.2);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
         }
 
-        /* Glowing Amber Flame Ambient Atmosphere (from image_41010a.jpg) */
-        .yt-thumb-canvas::before {
+        /* Glowing Ember effect on video canvas background */
+        .yt-preview-canvas::before {
             content: '';
             position: absolute;
             bottom: -30px;
-            left: 20px;
-            width: 150px;
-            height: 150px;
-            background: radial-gradient(circle, rgba(245, 158, 11, 0.45) 0%, rgba(217, 119, 6, 0) 70%);
-            filter: blur(12px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 160px;
+            height: 160px;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.3) 0%, rgba(217, 119, 6, 0) 70%);
+            filter: blur(15px);
             border-radius: 50%;
         }
 
-        /* Official Channel Stamp Watermark Badge Overlay */
-        .yt-badge-stamp {
+        /* The Gold Stamp Badge Element */
+        .yt-channel-badge {
             position: absolute;
-            top: 16px;
-            right: 16px;
+            top: 14px;
+            right: 14px;
             padding: 4px 10px;
             border: 1px solid #fbbf24;
             border-radius: 6px;
@@ -81,29 +89,59 @@
             letter-spacing: 0.5px;
         }
 
-        .yt-canvas-title {
-            font-size: 1.3rem;
-            color: #ffffff;
-            text-shadow: 2px 2px 5px rgba(0,0,0,0.95);
-            z-index: 2;
-            margin-bottom: 4px;
-            font-weight: 700;
+        /* --- AUDIO VISUALIZER BARS --- */
+        .visualizer-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 40px;
+            margin-bottom: 10px;
+            z-index: 5;
         }
 
-        .yt-canvas-sub {
+        .v-bar {
+            width: 4px;
+            height: 5px;
+            background: linear-gradient(to top, #d97706, #fbbf24);
+            border-radius: 2px;
+            transition: height 0.1s ease;
+        }
+
+        /* Bouncing Animation Keys for Visualizer */
+        @keyframes bounce {
+            0% { height: 8px; }
+            50% { height: 38px; }
+            100% { height: 8px; }
+        }
+
+        .player-app.is-playing .v-bar:nth-child(1) { animation: bounce 0.6s ease infinite 0.1s; }
+        .player-app.is-playing .v-bar:nth-child(2) { animation: bounce 0.4s ease infinite 0.3s; }
+        .player-app.is-playing .v-bar:nth-child(3) { animation: bounce 0.7s ease infinite 0.0s; }
+        .player-app.is-playing .v-bar:nth-child(4) { animation: bounce 0.5s ease infinite 0.2s; }
+        .player-app.is-playing .v-bar:nth-child(5) { animation: bounce 0.6s ease infinite 0.4s; }
+
+        .song-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 6px;
+            line-height: 1.3;
+            z-index: 5;
+        }
+
+        .song-chanter {
             font-size: 0.85rem;
             color: #fbbf24;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.95);
-            z-index: 2;
             font-weight: 500;
+            z-index: 5;
         }
 
-        /* --- PROGRESS BAR TRACK --- */
+        /* --- TIMELINE TRACK HANDLES --- */
         .timeline-box {
             margin-bottom: 24px;
         }
 
-        .timeline-bg {
+        .timeline-background {
             width: 100%;
             height: 6px;
             background: #2e1f14;
@@ -113,7 +151,7 @@
             margin-bottom: 8px;
         }
 
-        .timeline-progress {
+        .timeline-indicator {
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, #d97706, #fbbf24);
@@ -123,7 +161,7 @@
             left: 0;
         }
 
-        .time-stamps {
+        .time-labels {
             display: flex;
             justify-content: space-between;
             font-size: 0.8rem;
@@ -132,8 +170,8 @@
             font-weight: 600;
         }
 
-        /* --- THE CONTROLLERS --- */
-        .media-actions {
+        /* --- MEDIA MASTER CONTROLLERS --- */
+        .media-controllers {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -141,21 +179,21 @@
             margin-bottom: 28px;
         }
 
-        .action-btn {
+        .ctrl-btn {
             background: transparent;
             border: none;
             color: #a16207;
-            font-size: 1.8rem;
+            font-size: 1.7rem;
             cursor: pointer;
             transition: color 0.2s, transform 0.2s;
         }
 
-        .action-btn:hover {
+        .ctrl-btn:hover {
             color: #fbbf24;
             transform: scale(1.1);
         }
 
-        .action-btn.master-toggle {
+        .ctrl-btn.toggle-btn {
             background: #fbbf24;
             color: #18110a;
             width: 58px;
@@ -165,52 +203,62 @@
             justify-content: center;
             align-items: center;
             font-size: 1.3rem;
-            box-shadow: 0 6px 18px rgba(251, 191, 36, 0.35);
+            box-shadow: 0 6px 20px rgba(251, 191, 36, 0.35);
         }
 
-        .action-btn.master-toggle:hover {
+        .ctrl-btn.toggle-btn:hover {
             background: #ffffff;
             transform: scale(1.05);
         }
 
-        /* Hardware Volume Bar Grid */
-        .hardware-row {
+        /* Hardware Volume & Utility Grid */
+        .utility-box {
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: #23190f;
             padding: 10px 16px;
             border-radius: 12px;
-            margin-bottom: 30px;
+            margin-bottom: 28px;
             font-size: 0.85rem;
             border: 1px solid #2e1f14;
         }
 
-        .vol-deck {
+        .volume-container {
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .vol-range {
-            width: 80px;
+        .volume-range {
+            width: 75px;
             accent-color: #fbbf24;
             cursor: pointer;
         }
 
-        .badge-switch {
+        .toggle-switch {
             cursor: pointer;
             font-weight: 700;
             color: #78350f;
             transition: color 0.2s;
         }
 
-        .badge-switch.enabled {
+        .toggle-switch.active {
             color: #34d399;
         }
 
-        /* --- ROW CONTAINER (From image_4108a6.jpg) --- */
-        .sc-scroll-row {
+        /* --- SCROLLABLE PLAYLIST CARDS --- */
+        .list-header {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #a16207;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        /* Horizontal Scroll Container for SoundCloud Style */
+        .card-carousel {
             display: flex;
             gap: 16px;
             overflow-x: auto;
@@ -218,72 +266,72 @@
             scroll-behavior: smooth;
         }
 
-        .sc-scroll-row::-webkit-scrollbar {
-            height: 6px;
+        .card-carousel::-webkit-scrollbar {
+            height: 5px;
         }
-        .sc-scroll-row::-webkit-scrollbar-thumb {
+        .card-carousel::-webkit-scrollbar-thumb {
             background: #3a2512;
             border-radius: 10px;
         }
 
-        .sc-track-card {
-            flex: 0 0 125px;
+        /* Singular track card styling */
+        .card-node {
+            flex: 0 0 110px;
             cursor: pointer;
             transition: transform 0.2s;
         }
 
-        .sc-track-card:hover {
+        .card-node:hover {
             transform: translateY(-3px);
         }
 
-        /* 16:9 Aspect Video Thumbnail Card Framework Style */
-        .sc-artwork {
-            width: 125px;
-            height: 84px;
-            background: linear-gradient(135deg, #3a2216, #180e09);
-            border-radius: 10px;
+        /* Rotating Vinyl Record Artwork panel */
+        .card-artwork {
+            width: 110px;
+            height: 110px;
+            background: radial-gradient(circle, #3a2512 25%, #110a04 26%, #1c1107 40%, #000000 70%);
+            border-radius: 50%;
             margin-bottom: 8px;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 8px;
-            border: 2px solid transparent;
+            font-size: 1.5rem;
+            color: rgba(251, 191, 36, 0.4);
+            border: 2px solid rgba(255,255,255,0.05);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.5);
             position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
         }
 
-        .sc-artwork::after {
-            content: '✟';
+        /* Vinyl Center Label Hole */
+        .card-artwork::after {
+            content: '';
             position: absolute;
-            bottom: 4px;
-            right: 6px;
-            font-size: 0.65rem;
-            color: #fbbf24;
-            opacity: 0.3;
+            width: 14px;
+            height: 14px;
+            background: #fbbf24;
+            border-radius: 50%;
+            border: 3px solid #110a04;
         }
 
-        .sc-track-card.selected .sc-artwork {
+        /* Continuous rotation animation setup */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Only spin the vinyl when the track is explicitly selected AND app is playing */
+        .player-app.is-playing .card-node.selected .card-artwork {
+            animation: spin 3.5s linear infinite;
             border-color: #fbbf24;
-            background: linear-gradient(135deg, #54311f, #26140b);
-            box-shadow: 0 0 12px rgba(251, 191, 36, 0.2);
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.25);
         }
 
-        .sc-card-innertext {
-            font-size: 0.75rem;
-            color: #fbbf24;
-            text-align: center;
-            font-weight: 700;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            width: 100%;
-            letter-spacing: 0.5px;
+        .card-node.selected .card-artwork {
+            border-color: rgba(251, 191, 36, 0.5);
         }
 
-        .sc-meta-title {
-            font-size: 0.85rem;
+        .card-song-title {
+            font-size: 0.8rem;
             font-weight: 600;
             color: #e2e8f0;
             white-space: nowrap;
@@ -293,141 +341,155 @@
             margin-bottom: 2px;
         }
 
-        .sc-meta-chanter {
+        .card-song-chanter {
             font-size: 0.75rem;
             color: #a16207;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             display: block;
-            font-weight: 500;
         }
     </style>
 </head>
 <body>
 
-    <div class="player-app">
-        <div class="yt-thumb-canvas">
-            <div class="yt-badge-stamp">ማኅቶት</div>
-            <div class="yt-canvas-title" id="canvas-title">በድንኳኔ እልልታ ሙሉ ነው</div>
-            <div class="yt-canvas-sub" id="canvas-chanter">ሊቀ መዘምራን ቴዎድሮስ ዮሴፍ</div>
+    <audio id="audio-platform" crossorigin="anonymous"></audio>
+
+    <div class="player-app" id="player-container">
+        <div class="meta-container">
+            <div class="yt-preview-canvas">
+                <div class="yt-channel-badge">ማኅቶት</div>
+                
+                <div class="visualizer-container">
+                    <div class="v-bar"></div>
+                    <div class="v-bar"></div>
+                    <div class="v-bar"></div>
+                    <div class="v-bar"></div>
+                    <div class="v-bar"></div>
+                </div>
+
+                <h2 class="song-title" id="title-display">በድንኳኔ እልልታ ሙሉ ነው</h2>
+                <div class="song-chanter" id="chanter-display">ሊቀ መዘምራን ቴዎድሮስ ዮሴፍ</div>
+            </div>
         </div>
 
         <div class="timeline-box">
-            <div class="timeline-bg" id="scrub-pad">
-                <div class="timeline-progress" id="progress-line"></div>
+            <div class="timeline-background" id="scrub-target">
+                <div class="timeline-indicator" id="progress-bar"></div>
             </div>
-            <div class="time-stamps">
-                <span id="time-now">0:00</span>
+            <div class="time-labels">
+                <span id="time-current">0:00</span>
                 <span id="time-duration">0:00</span>
             </div>
         </div>
 
-        <div class="media-actions">
-            <button class="action-btn" onclick="triggerPrev()">⏮</button>
-            <button class="action-btn master-toggle" id="state-toggle" onclick="togglePlay()">▶</button>
-            <button class="action-btn" onclick="triggerNext()">⏭</button>
+        <div class="media-controllers">
+            <button class="ctrl-btn" onclick="triggerPrev()">⏮</button>
+            <button class="ctrl-btn toggle-btn" id="play-state-btn" onclick="togglePlay()">▶</button>
+            <button class="ctrl-btn" onclick="triggerNext()">⏭</button>
         </div>
 
-        <div class="hardware-row">
-            <div class="vol-deck">
+        <div class="utility-box">
+            <div class="volume-container">
                 <span>🔊</span>
-                <input type="range" class="vol-range" id="vol-deck" min="0" max="1" step="0.05" value="0.8" oninput="setVolume(this.value)">
+                <input type="range" class="volume-range" id="volume-fader" min="0" max="1" step="0.05" value="0.8" oninput="setVolume(this.value)">
             </div>
-            <div class="badge-switch enabled" id="auto-badge" onclick="toggleAutoplay()">Autoplay: ON</div>
+            <div class="toggle-switch active" id="autoplay-status" onclick="toggleAutoplay()">Autoplay: ON</div>
         </div>
 
-        <div class="sc-scroll-row" id="sc-scroll-container">
+        <div class="list-header">Mezmur Playlist</div>
+        <div class="card-carousel" id="playlist-carousel">
             </div>
     </div>
 
-    <audio id="audio-core" crossorigin="anonymous"></audio>
-
     <script>
+        // Media proxy gateway pipe prefix to handle cross-origin streams cleanly
+        const proxyGateway = "https://api.allorigins.win/raw?url=";
+
         const tracks = [
             { 
                 title: "በድንኳኔ እልልታ ሙሉ ነው", 
                 chanter: "ሊቀ መዘምራን ቴዎድሮስ ዮሴፍ", 
-                src: "https://tewahedo.fra1.digitaloceanspaces.com/Mezmur/Tewodros%20Yosef/Bedenkuane%20Elelta%20Mulu%20New.mp3",
-                shortGehez: "በድንኳኔ"
+                src: proxyGateway + encodeURIComponent("https://tewahedo.fra1.digitaloceanspaces.com/Mezmur/Tewodros%20Yosef/Bedenkuane%20Elelta%20Mulu%20New.mp3")
             },
             { 
                 title: "አይናችን ነሽ ማርያም", 
                 chanter: "ሊቀ መዘምራን ቴዎድሮስ ዮሴፍ", 
-                src: "https://tewahedo.fra1.digitaloceanspaces.com/Mezmur/Tewodros%20Yosef/Aynachen%20Nesh%20Mariam.mp3",
-                shortGehez: "አይናችን ነሽ"
+                src: proxyGateway + encodeURIComponent("https://tewahedo.fra1.digitaloceanspaces.com/Mezmur/Tewodros%20Yosef/Aynachen%20Nesh%20Mariam.mp3")
             },
             { 
-                title: "ከኃጢአተኛው ድንኳን", 
-                chanter: "ሊቀ መዘምራን ቴዎድሮስ ዮሴፍ", 
-                src: "https://tewahedo.fra1.digitaloceanspaces.com/Mezmur/Tewodros%20Yosef/Endemanenetema.mp3",
-                shortGehez: "ከኃጢአተኛው ድንኳን"
+                title: "እንደማንነቴማማ", 
+                chanter: "ዘማሪት ምርትነሽ ጥላሁን", 
+                src: proxyGateway + encodeURIComponent("https://tewahedo.fra1.digitaloceanspaces.com/Mezmur/Tewodros%20Yosef/Endemanenetema.mp3")
             },
             { 
                 title: "ማርያም ማርያም", 
                 chanter: "ሊቀ መዘምራን ቴዎድሮስ ዮሴፍ", 
-                src: "https://tewahedo.fra1.digitaloceanspaces.com/Mezmur/Tewodros%20Yosef/Mariam%20Mariam.mp3",
-                shortGehez: "ማርያም"
+                src: proxyGateway + encodeURIComponent("https://tewahedo.fra1.digitaloceanspaces.com/Mezmur/Tewodros%20Yosef/Mariam%20Mariam.mp3")
             }
         ];
 
         let index = 0;
-        let active = false;
+        let playing = false;
         let autoplay = true;
 
-        const audio = document.getElementById('audio-core');
-        const stateBtn = document.getElementById('state-toggle');
-        const canvasTitle = document.getElementById('canvas-title');
-        const canvasChanter = document.getElementById('canvas-chanter');
-        const progressLine = document.getElementById('progress-line');
-        const scrubPad = document.getElementById('scrub-pad');
-        const timeNow = document.getElementById('time-now');
+        const audio = document.getElementById('audio-platform');
+        const playBtn = document.getElementById('play-state-btn');
+        const appContainer = document.getElementById('player-container');
+        const titleDisplay = document.getElementById('title-display');
+        const chanterDisplay = document.getElementById('chanter-display');
+        const progressBar = document.getElementById('progress-bar');
+        const timelineBg = document.getElementById('scrub-target');
+        const timeCurrent = document.getElementById('time-current');
         const timeDuration = document.getElementById('time-duration');
-        const scrollContainer = document.getElementById('sc-scroll-container');
-        const autoBadge = document.getElementById('auto-badge');
+        const playlistCarousel = document.getElementById('playlist-carousel');
+        const autoplayStatus = document.getElementById('autoplay-status');
 
         window.addEventListener('DOMContentLoaded', () => {
-            buildSoundCloudUI();
-            setupTrack(index);
+            generatePlaylistCards();
+            loadMezmur(index, false);
         });
 
-        function setupTrack(trackIndex) {
+        function loadMezmur(trackIndex, shouldPlay = playing) {
             const data = tracks[trackIndex];
             audio.src = data.src;
-            
-            canvasTitle.textContent = data.title;
-            canvasChanter.textContent = data.chanter;
+            titleDisplay.textContent = data.title;
+            chanterDisplay.textContent = data.chanter;
 
-            document.querySelectorAll('.sc-track-card').forEach((card, i) => {
-                if(i === trackIndex) card.classList.add('selected');
-                else card.classList.remove('selected');
+            document.querySelectorAll('.card-node').forEach((node, idx) => {
+                if(idx === trackIndex) node.classList.add('selected');
+                else node.classList.remove('selected');
             });
 
-            if (active) {
-                audio.play().catch(err => console.log("Stream context authorization await hook:", err));
+            if (shouldPlay) {
+                audio.play().catch(err => console.log("Stream synchronization pending..."));
             }
         }
 
         function togglePlay() {
-            if (active) {
+            if (playing) {
                 audio.pause();
-                stateBtn.textContent = "▶";
-                active = false;
+                playBtn.textContent = "▶";
+                appContainer.classList.remove('is-playing'); // Halts vinyl spinning and visualizer bars
+                playing = false;
             } else {
-                audio.play().catch(err => console.log("Stream dynamic track allocation fallback log:", err));
-                stateBtn.textContent = "⏸";
-                active = true;
+                audio.play().catch(err => {
+                    loadMezmur(index, true);
+                });
+                playBtn.textContent = "⏸";
+                appContainer.classList.add('is-playing'); // Activates visualizer and disc spins
+                playing = true;
             }
         }
 
         function triggerNext() {
             index = (index + 1) % tracks.length;
-            setupTrack(index);
+            loadMezmur(index, playing);
         }
 
         function triggerPrev() {
             index = (index - 1 + tracks.length) % tracks.length;
-            setupTrack(index);
+            loadMezmur(index, playing);
         }
 
         function setVolume(v) {
@@ -437,66 +499,69 @@
         function toggleAutoplay() {
             autoplay = !autoplay;
             if(autoplay) {
-                autoBadge.textContent = "Autoplay: ON";
-                autoBadge.classList.add('enabled');
+                autoplayStatus.textContent = "Autoplay: ON";
+                autoplayStatus.classList.add('active');
             } else {
-                autoBadge.textContent = "Autoplay: OFF";
-                autoBadge.classList.remove('enabled');
+                autoplayStatus.textContent = "Autoplay: OFF";
+                autoplayStatus.classList.remove('active');
             }
         }
 
-        function convertTime(sec) {
-            if (isNaN(sec)) return "0:00";
-            const m = Math.floor(sec / 60);
-            const s = Math.floor(sec % 60);
-            return m + ":" + (s < 10 ? "0" : "") + s;
+        function convertTime(seconds) {
+            if (isNaN(seconds) || !isFinite(seconds)) return "0:00";
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return mins + ":" + (secs < 10 ? "0" : "") + secs;
         }
 
         audio.addEventListener('timeupdate', () => {
-            const ratio = (audio.currentTime / audio.duration) * 100;
-            progressLine.style.width = ratio + "%";
-            timeNow.textContent = convertTime(audio.currentTime);
+            if (audio.duration) {
+                const ratio = (audio.currentTime / audio.duration) * 100;
+                progressBar.style.width = ratio + "%";
+            }
+            timeCurrent.textContent = convertTime(audio.currentTime);
         });
 
         audio.addEventListener('loadedmetadata', () => {
             timeDuration.textContent = convertTime(audio.duration);
         });
 
-        scrubPad.addEventListener('click', (e) => {
-            const totalWidth = scrubPad.clientWidth;
+        timelineBg.addEventListener('click', (e) => {
+            const width = timelineBg.clientWidth;
             const clickPosition = e.offsetX;
-            audio.currentTime = (clickPosition / totalWidth) * audio.duration;
+            if (audio.duration) {
+                audio.currentTime = (clickPosition / width) * audio.duration;
+            }
         });
 
         audio.addEventListener('ended', () => {
             if (autoplay) {
                 triggerNext();
             } else {
-                active = false;
-                stateBtn.textContent = "▶";
+                playing = false;
+                playBtn.textContent = "▶";
+                appContainer.classList.remove('is-playing');
             }
         });
 
-        function buildSoundCloudUI() {
-            scrollContainer.innerHTML = "";
-            tracks.forEach((track, i) => {
+        function generatePlaylistCards() {
+            playlistCarousel.innerHTML = "";
+            tracks.forEach((track, idx) => {
                 const div = document.createElement('div');
-                div.className = "sc-track-card";
+                div.className = "card-node";
                 div.innerHTML = `
-                    <div class="sc-artwork">
-                        <div class="sc-card-innertext">${track.shortGehez}</div>
-                    </div>
-                    <span class="sc-meta-title">${track.title}</span>
-                    <span class="sc-meta-chanter">${track.chanter.split(' ')[1] || track.chanter}</span>
+                    <div class="card-artwork"></div>
+                    <span class="card-song-title">${track.title}</span>
+                    <span class="card-song-chanter">${track.chanter.split(' ')[1] || track.chanter}</span>
                 `;
-                
                 div.addEventListener('click', () => {
-                    index = i;
-                    active = true;
-                    stateBtn.textContent = "⏸";
-                    setupTrack(index);
+                    index = idx;
+                    playing = true;
+                    playBtn.textContent = "⏸";
+                    appContainer.classList.add('is-playing');
+                    loadMezmur(index, true);
                 });
-                scrollContainer.appendChild(div);
+                playlistCarousel.appendChild(div);
             });
         }
     </script>
